@@ -31,11 +31,11 @@ async function query(filterBy = {}) {
 }
 
 async function getById(tourId) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   try {
     const tour = await collection.findOne({ _id: ObjectId(tourId) });
     delete tour.password;
-
+    console.log('backendddddd', tour)
     tour.givenReviews = await reviewService.query({
       byTourId: ObjectId(tour._id)
     });
@@ -43,7 +43,6 @@ async function getById(tourId) {
       delete review.byTour;
       return review;
     });
-
     return tour;
   } catch (err) {
     console.log(`ERROR: while finding tour ${tourId}`);
@@ -51,7 +50,7 @@ async function getById(tourId) {
   }
 }
 async function getByEmail(email) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   try {
     const tour = await collection.findOne({ email });
     return tour;
