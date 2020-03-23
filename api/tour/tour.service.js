@@ -15,11 +15,14 @@ async function query(filterBy = {}) {
   console.log("query filterBy: ", filterBy);
 
   const criteria = _buildCriteria(filterBy);
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   try {
-    // const tours = await collection.find(criteria).collation({locale: "en" }).toArray();
-    const tours = await collection.find(criteria).toArray();
-    if (filterBy.sort) tours.sort(_dynamicSort(filterBy.sort));
+
+    const tours = await collection.aggregate([
+      {
+        $match: { "tour._id": { $ne: null } }
+      }
+    ]).toArray();
     return tours;
   } catch (err) {
     console.log("ERROR: cannot find tours");
@@ -113,13 +116,13 @@ function _buildCriteria(filterBy) {
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function(a, b) {
+  return function (a, b) {
     if (property === "name")
       return a[property].toLowerCase() < b[property].toLowerCase()
         ? -1
         : a[property].toLowerCase() > b[property].toLowerCase()
-        ? 1
-        : 0;
+          ? 1
+          : 0;
     // else if (property === 'createdAt') return -1
     else return a[property] - b[property];
   };
