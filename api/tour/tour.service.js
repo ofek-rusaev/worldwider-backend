@@ -59,11 +59,29 @@ async function getByEmail(email) {
     throw err;
   }
 }
+function getEmptyTour() {
+  return emptyTour = {
+    _id: null,
+    name: "",
+    city: "",
+    desc:
+      "",
+    tags: [],
+    spots: [],
+    price: null,
+    tourImgUrls: [],
+  }
+}
 
 async function remove(tourId) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   try {
-    await collection.deleteOne({ _id: ObjectId(tourId) });
+    await collection.updateOne({ _id: ObjectId(tourId) }, {
+      $set: {
+        tour: getEmptyTour()
+      }
+    })
+    // await collection.deleteOne({ _id: ObjectId(tourId) });
   } catch (err) {
     console.log(`ERROR: cannot remove tour ${tourId}`);
     throw err;
@@ -71,7 +89,7 @@ async function remove(tourId) {
 }
 
 async function update(tour) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   tour._id = ObjectId(tour._id);
 
   try {
@@ -84,7 +102,7 @@ async function update(tour) {
 }
 
 async function add(tour) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection("user");
   try {
     await collection.insertOne(tour);
     return tour;
