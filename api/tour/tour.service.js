@@ -43,8 +43,6 @@ async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0,
         }
       }
     ]).toArray()
-    console.log('tours in try: ', tours)
-
     return tours;
   }
   catch (error) {
@@ -58,7 +56,6 @@ async function getById(tourId) {
   try {
     const tour = await collection.findOne({ _id: ObjectId(tourId) });
     delete tour.password;
-    // console.log('backendddddd', tour)
     tour.givenReviews = await reviewService.query({
       byTourId: ObjectId(tour._id)
     });
@@ -107,9 +104,10 @@ async function update(tour) {
 }
 
 async function add(tour) {
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection("tour");
   try {
     await collection.insertOne(tour);
+    userService.update(tour);
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -121,7 +119,8 @@ function _buildCriteria(filterBy) {
   var criteria = {};
   console.log(filterBy)
   if (filterBy.city) {
-    criteria.city = filterBy.city;
+    var regex = new RegExp(filterBy.city, 'i');
+    criteria.city = { $regex: regex };
   }
   if (filterBy.price) {
 

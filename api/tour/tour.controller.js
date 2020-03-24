@@ -2,8 +2,6 @@ const tourService = require("./tour.service");
 
 async function getTour(req, res) {
   const tour = await tourService.query({ tourId: req.params.id });
-  console.log('in get tour: ', tour);
-
   res.send(tour);
 }
 
@@ -17,7 +15,6 @@ async function addTour(req, res) {
 async function getTours(req, res) {
   console.log('getting tours')
   const tours = await tourService.query(req.query);
-  // console.log('after getting tpurs', tours)
   res.send(tours);
 }
 
