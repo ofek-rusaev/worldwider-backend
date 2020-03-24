@@ -8,20 +8,17 @@ async function getTour(req, res) {
 async function addTour(req, res) {
   var tour = req.body;
   tour = await tourService.add(tour);
-  console.log('inside controller', tour)
   // TODO - need to find aboutUser
   res.send(tour);
 }
 
 async function getTours(req, res) {
+  console.log('getting tours')
   const tours = await tourService.query(req.query);
+  // console.log('after getting tpurs', tours)
   res.send(tours);
 }
 
-async function getTourGuides(req, res) {
-  const tourGuides = await tourService.queryTourGuides(req.query);
-  res.send(tourGuides);
-}
 
 async function deleteTour(req, res) {
   await tourService.remove(req.params.id);
@@ -36,7 +33,6 @@ async function updateTour(req, res) {
 
 module.exports = {
   getTour,
-  getTourGuides,
   getTours,
   deleteTour,
   updateTour,

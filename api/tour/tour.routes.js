@@ -7,7 +7,6 @@ const {
   getTour,
   addTour,
   getTours,
-  getTourGuides,
   deleteTour,
   updateTour
 } = require("./tour.controller");
@@ -18,7 +17,6 @@ const router = express.Router();
 // router.use(requireAuth)
 
 router.get("/", getTours);
-// router.get("/", getTourGuides);
 router.post("/", addTour);
 router.get("/:id", getTour);
 router.put("/:id", updateTour);

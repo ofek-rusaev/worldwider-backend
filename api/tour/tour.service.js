@@ -9,52 +9,52 @@ module.exports = {
   remove,
   update,
   add,
-  queryTourGuides
 };
 
-async function query(filterBy = {}) {
+async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 }) {
   const criteria = _buildCriteria(filterBy);
-  const collection = await dbService.getCollection("tour");
-  // try {
-  // const tours = await collection.aggregate([
-  //   {
-  //     $match: { "tour._id": { $ne: null } }
-  //   }
-  // ]).toArray();
+  const tourCollection = await dbService.getCollection("tour");
   try {
-    const tours = await collection.find(criteria).toArray();
-    console.log('inside service', tours)
-    const tourGuideIds = tours.map(tour => tour.tourGuideId);
-    queryTourGuides();
-    // if (filterBy.sort) tours.sort(_dynamicSort(filterBy.sort));
-    return tours;
-  } catch (err) {
-    console.log('ERROR: cannot find tours')
-    throw err;
-  }
-}
-async function queryTourGuides() {
-  const collection = await dbService.getCollection("user");
-  try {
-    const tourGuides = await collection.aggregate([
+    let tours = await tourCollection.aggregate([
       {
-        $match: { "user.tourId": { $ne: null } }
-      }
-    ]).toArray();
-    console.log('tourGuides: ', tourGuides);
+        $match: criteria
 
-    return tourGuides;
-  } catch (err) {
-    console.log('ERROR: cannot find tourGuides')
-    throw err;
+      },
+      {
+        $lookup:
+        {
+          from: 'user',
+          localField: "tourGuideId",
+          foreignField: "_id", //belong to the "from" collection
+          as: "tourGuide"
+        }
+      },
+      {
+        $unwind: '$tourGuide'
+      },
+      {
+        $project: {
+          "tourGuide._id": false,
+          "tourGuide.password": false,
+          "tourGuide.isAdmin": false,
+          "tourGuide.tourId": false,
+        }
+      }
+    ]).toArray()
+    return tours;
+  }
+  catch (error) {
+    console.log('ERROR: cannot find tours')
+    throw error;
   }
 }
+
 async function getById(tourId) {
   const collection = await dbService.getCollection("user");
   try {
     const tour = await collection.findOne({ _id: ObjectId(tourId) });
     delete tour.password;
-    console.log('backendddddd', tour)
+    // console.log('backendddddd', tour)
     tour.givenReviews = await reviewService.query({
       byTourId: ObjectId(tour._id)
     });
@@ -114,20 +114,37 @@ async function add(tour) {
 }
 
 function _buildCriteria(filterBy) {
-  var criteria = { $and: [] };
-  if (filterBy.name) {
-    criteria.$and.push({ name: filterBy.name });
+  var criteria = {};
+  console.log(filterBy)
+  if (filterBy.city) {
+    criteria.city = filterBy.city;
   }
-  if (filterBy.type) {
-    criteria.$and.push({ type: filterBy.type });
+  if (filterBy.price) {
+
+    criteria.price = {
+      $gte: filterBy.minPrice,
+      $lte: filterBy.maxPrice
+    }
   }
-  if (filterBy.inStock) {
-    criteria.$and.push({ inStock: filterBy.inStock });
+  if (filterBy.rating) {
+    criteria.rating = {
+      $lte: filterBy.maxRating,
+      $gte: filterBy.minRating
+    }
   }
-  if (criteria.$and.length === 0) {
-    criteria = {};
+
+
+  if (filterBy.tourGuideId) {
+    criteria.tourGuideId = ObjectId(filterBy.tourGuideId)
   }
-  // const criteria = {}
+  if (filterBy.tourId) {
+    criteria.tourId = ObjectId(filterBy.tourId)
+  }
+  if (filterBy.tags) {
+    //Gets an array of tags
+    criteria.tags = { $eq: filterBy.tags }
+  }
+
   return criteria;
 }
 

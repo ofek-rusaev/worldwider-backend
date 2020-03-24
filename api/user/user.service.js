@@ -11,13 +11,15 @@ module.exports = {
   add
 };
 
-async function query(filterBy = {}) {
+async function query(filterBy = { tourGuideId: ObjectId("5e78bf9c574870fbd3cc07eb") }) {
   const criteria = _buildCriteria(filterBy);
   const collection = await dbService.getCollection("user");
   try {
     // const users = await collection.find({}).toArray();
     const users = await collection.find(criteria).toArray();
     users.forEach(user => delete user.password);
+    console.log('in query BE: ', users);
+
     return users;
   } catch (err) {
     console.log("ERROR: cannot find users");
@@ -57,6 +59,8 @@ async function getByEmail(email) {
 }
 
 async function remove(userId) {
+  console.log('user service DELETE: ', userId);
+
   const collection = await dbService.getCollection("user");
   try {
     await collection.deleteOne({ _id: ObjectId(userId) });
@@ -93,10 +97,15 @@ async function add(user) {
 function _buildCriteria(filterBy) {
   const criteria = {};
   if (filterBy.txt) {
-    criteria.username = filterBy.txt;
+    criteria.city = filterBy.txt;
   }
-  if (filterBy.minBalance) {
-    criteria.balance = { $gte: +filterBy.minBalance };
+  if (filterBy.tourGuideId) {
+    criteria.tourGuideId = { $eq: filterBy.tourGuideId };
   }
+  // if (filterBy.price) {
+  //   criteria.price = { $gt: filterBy.tourGuideId };
+  // }
+
+
   return criteria;
 }
