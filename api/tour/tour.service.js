@@ -11,11 +11,27 @@ module.exports = {
   add,
 };
 
-async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 }) {
-  console.log('QUERY _ filterBy: ', filterBy);
+async function query(filterBy) {
+  console.log('Before _ filterBy: ', filterBy);
+  if (!filterBy.minPrice) {
+    filterBy.minPrice = '0'
+  }
+  if (!filterBy.maxPrice) {
+    filterBy.maxPrice = '10000000'
+  }
+  if (!filterBy.minRating) {
+    filterBy.minRating = '0'
+  }
+  if (!filterBy.maxRating) {
+    filterBy.maxRating = '5'
+  }
+
+
+  console.log('After _ filterBy: ', filterBy);
 
   const criteria = _buildCriteria(filterBy);
-  console.log('QUERY _  criteria: ', criteria);
+  // const criteria = {}
+  console.log('criteria: ', criteria);
 
   const tourCollection = await dbService.getCollection("tour");
   try {
@@ -118,36 +134,39 @@ async function add(tour) {
 }
 
 function _buildCriteria(filterBy) {
-  console.log('_buildCriteria FILTER BY : ', filterBy);
+  // console.log('_buildCriteria FILTER BY : ', filterBy);
 
   var criteria = {};
-  console.log('_buildCriteria - filterBy: ', filterBy)
+  // console.log('_buildCriteria - filterBy: ', filterBy)
   if (filterBy.city) {
     var regex = new RegExp(filterBy.city, 'i');
     criteria.city = { $regex: regex };
   }
-  if (filterBy.price) {
+  // if (filterBy.price) {
 
-    criteria.price = {
-      $gte: +filterBy.minPrice,
-      $lte: +filterBy.maxPrice
-    }
-    console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
+  criteria.price = {
+    $gte: +filterBy.minPrice,
+    $lt: +filterBy.maxPrice
+
   }
-  if (filterBy.rating) {
-    criteria.rating = {
-      $lte: +filterBy.maxRating,
-      $gte: +filterBy.minRating
-    }
-    console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
-  }
+  console.log('IN IF filterBy.price - criteria.price ::::: ', criteria);
+  // }
+  // if (filterBy.rating) {
+  // criteria.rating = {
+
+  //   $lte: +filterBy.maxRating,
+  //   $gt: +filterBy.minRating
+
+  // }
+  // console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
+  // }
   if (filterBy.tourGuideId) {
-    console.log('filterBy.tourGuideId', filterBy.tourGuideId);
+    // console.log('filterBy.tourGuideId', filterBy.tourGuideId);
 
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId)
   }
   if (filterBy.tourId) {
-    console.log('filterBy.tourId', filterBy.tourId);
+    // console.log('filterBy.tourId', filterBy.tourId);
     criteria._id = ObjectId(filterBy.tourId)
   }
   if (filterBy.tags) {
