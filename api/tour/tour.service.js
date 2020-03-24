@@ -12,8 +12,10 @@ module.exports = {
 };
 
 async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 }) {
+  console.log('QUERY _ filterBy: ', filterBy);
+
   const criteria = _buildCriteria(filterBy);
-  console.log('criteria: ', criteria);
+  console.log('QUERY _  criteria: ', criteria);
 
   const tourCollection = await dbService.getCollection("tour");
   try {
@@ -116,8 +118,10 @@ async function add(tour) {
 }
 
 function _buildCriteria(filterBy) {
+  console.log('_buildCriteria FILTER BY : ', filterBy);
+
   var criteria = {};
-  console.log(filterBy)
+  console.log('_buildCriteria - filterBy: ', filterBy)
   if (filterBy.city) {
     var regex = new RegExp(filterBy.city, 'i');
     criteria.city = { $regex: regex };
@@ -125,18 +129,18 @@ function _buildCriteria(filterBy) {
   if (filterBy.price) {
 
     criteria.price = {
-      $gte: filterBy.minPrice,
-      $lte: filterBy.maxPrice
+      $gte: +filterBy.minPrice,
+      $lte: +filterBy.maxPrice
     }
+    console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
   }
   if (filterBy.rating) {
     criteria.rating = {
-      $lte: filterBy.maxRating,
-      $gte: filterBy.minRating
+      $lte: +filterBy.maxRating,
+      $gte: +filterBy.minRating
     }
+    console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   }
-
-
   if (filterBy.tourGuideId) {
     console.log('filterBy.tourGuideId', filterBy.tourGuideId);
 
