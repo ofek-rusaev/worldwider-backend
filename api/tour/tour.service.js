@@ -13,7 +13,6 @@ module.exports = {
 };
 
 async function query(filterBy) {
-  console.log('Before _ filterBy: ', filterBy);
   if (!filterBy.minPrice) {
     filterBy.minPrice = '0'
   }
@@ -28,17 +27,10 @@ async function query(filterBy) {
   }
 
 
-  console.log('After _ filterBy: ', filterBy);
 
   const criteria = _buildCriteria(filterBy);
-  // const criteria = {}
-  console.log('criteria: ', criteria);
   const COLLECTION_NAME = "tour";
 
-  async function query(
-    filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 })
-  const criteria = _buildCriteria(filterBy);
-  console.log("criteria: ", criteria);
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
