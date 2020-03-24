@@ -8,28 +8,47 @@ module.exports = {
   getByEmail,
   remove,
   update,
-  add
+  add,
+  queryTourGuides
 };
 
 async function query(filterBy = {}) {
-  console.log("query filterBy: ", filterBy);
-
   const criteria = _buildCriteria(filterBy);
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection("tour");
+  // try {
+  // const tours = await collection.aggregate([
+  //   {
+  //     $match: { "tour._id": { $ne: null } }
+  //   }
+  // ]).toArray();
   try {
-
-    const tours = await collection.aggregate([
-      {
-        $match: { "tour._id": { $ne: null } }
-      }
-    ]).toArray();
+    const tours = await collection.find(criteria).toArray();
+    console.log('inside service', tours)
+    const tourGuideIds = tours.map(tour => tour.tourGuideId);
+    queryTourGuides();
+    // if (filterBy.sort) tours.sort(_dynamicSort(filterBy.sort));
     return tours;
   } catch (err) {
-    console.log("ERROR: cannot find tours");
+    console.log('ERROR: cannot find tours')
     throw err;
   }
 }
+async function queryTourGuides() {
+  const collection = await dbService.getCollection("user");
+  try {
+    const tourGuides = await collection.aggregate([
+      {
+        $match: { "user.tourId": { $ne: null } }
+      }
+    ]).toArray();
+    console.log('tourGuides: ', tourGuides);
 
+    return tourGuides;
+  } catch (err) {
+    console.log('ERROR: cannot find tourGuides')
+    throw err;
+  }
+}
 async function getById(tourId) {
   const collection = await dbService.getCollection("user");
   try {

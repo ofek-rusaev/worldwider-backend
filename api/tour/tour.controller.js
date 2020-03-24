@@ -14,9 +14,13 @@ async function addTour(req, res) {
 }
 
 async function getTours(req, res) {
-  // console.log('getTours', req.query);
   const tours = await tourService.query(req.query);
   res.send(tours);
+}
+
+async function getTourGuides(req, res) {
+  const tourGuides = await tourService.queryTourGuides(req.query);
+  res.send(tourGuides);
 }
 
 async function deleteTour(req, res) {
@@ -32,6 +36,7 @@ async function updateTour(req, res) {
 
 module.exports = {
   getTour,
+  getTourGuides,
   getTours,
   deleteTour,
   updateTour,
