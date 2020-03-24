@@ -8,7 +8,8 @@ module.exports = {
   getByEmail,
   remove,
   update,
-  add,
+  getEmpty,
+  add
 };
 
 async function query(filterBy) {
@@ -32,45 +33,52 @@ async function query(filterBy) {
   const criteria = _buildCriteria(filterBy);
   // const criteria = {}
   console.log('criteria: ', criteria);
+  const COLLECTION_NAME = "tour";
 
-  const tourCollection = await dbService.getCollection("tour");
+  async function query(
+    filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 })
+  const criteria = _buildCriteria(filterBy);
+  console.log("criteria: ", criteria);
+
+  const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
-    let tours = await tourCollection.aggregate([
-      {
-        $match: criteria
-
-      },
-      {
-        $lookup:
+    let tours = await tourCollection
+      .aggregate([
         {
-          from: 'user',
-          localField: "tourGuideId",
-          foreignField: "_id", //belong to the "from" collection
-          as: "tourGuide"
+          $match: criteria
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "tourGuideId",
+            foreignField: "_id", //belong to the "from" collection
+            as: "tourGuide"
+          }
+        },
+        {
+          $unwind: "$tourGuide"
+        },
+        {
+          $project: {
+            "tourGuide._id": false,
+            "tourGuide.password": false,
+            "tourGuide.isAdmin": false,
+            "tourGuide.tourId": false
+          }
         }
-      },
-      {
-        $unwind: '$tourGuide'
-      },
-      {
-        $project: {
-          "tourGuide._id": false,
-          "tourGuide.password": false,
-          "tourGuide.isAdmin": false,
-          "tourGuide.tourId": false,
-        }
-      }
-    ]).toArray()
+
+      ])
+      .toArray();
+
     return tours;
-  }
-  catch (error) {
-    console.log('ERROR: cannot find tours')
+  } catch (error) {
+    console.log("ERROR: cannot find tours");
     throw error;
   }
 }
 
 async function getById(tourId) {
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     const tour = await collection.findOne({ _id: ObjectId(tourId) });
     delete tour.password;
@@ -88,7 +96,7 @@ async function getById(tourId) {
   }
 }
 async function getByEmail(email) {
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     const tour = await collection.findOne({ email });
     return tour;
@@ -99,7 +107,7 @@ async function getByEmail(email) {
 }
 
 async function remove(tourId) {
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.deleteOne({ _id: ObjectId(tourId) });
   } catch (err) {
@@ -109,7 +117,7 @@ async function remove(tourId) {
 }
 
 async function update(tour) {
-  const collection = await dbService.getCollection("user");
+  const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
 
   try {
@@ -122,7 +130,7 @@ async function update(tour) {
 }
 
 async function add(tour) {
-  const collection = await dbService.getCollection("tour");
+  const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
     userService.update(tour);
@@ -131,6 +139,37 @@ async function add(tour) {
     console.log(`ERROR: cannot insert tour`);
     throw err;
   }
+}
+
+function getEmpty() {
+  return {
+    name: "Tour Name",
+    city: "Tel Aviv",
+    desc:
+      "Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptatum fugit perspiciatis ex quis vitae libero explicabo laboriosam. Nobis necessitatibus maiores dicta ex soluta maxime, fugit, ab sunt, consectetur reprehenderit accusamus.",
+    tags: ["food", "night life"],
+    spots: [
+      {
+        name: "Barrio Shoreditch",
+        loc: {
+          lat: 51.5260442,
+          lng: -0.0781866
+        }
+      },
+      {
+        name: "Shoreditch",
+        loc: {
+          lat: 51.5229106,
+          lng: -0.0777472
+        }
+      }
+    ],
+    price: 0,
+    tourImgUrls: [
+      "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
+    ],
+    maxAttendees: 3
+  };
 }
 
 function _buildCriteria(filterBy) {
@@ -142,12 +181,19 @@ function _buildCriteria(filterBy) {
     var regex = new RegExp(filterBy.city, 'i');
     criteria.city = { $regex: regex };
   }
-  // if (filterBy.price) {
-
-  criteria.price = {
-    $gte: +filterBy.minPrice,
-    $lt: +filterBy.maxPrice
-
+  if (filterBy.price) {
+    criteria.price = {
+      $gte: +filterBy.minPrice,
+      $lte: +filterBy.maxPrice
+    }
+    console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
+  }
+  if (filterBy.rating) {
+    criteria.rating = {
+      $lte: +filterBy.maxRating,
+      $gte: +filterBy.minRating
+    }
+    console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   }
   console.log('IN IF filterBy.price - criteria.price ::::: ', criteria);
   // }
@@ -163,7 +209,7 @@ function _buildCriteria(filterBy) {
   if (filterBy.tourGuideId) {
     // console.log('filterBy.tourGuideId', filterBy.tourGuideId);
 
-    criteria.tourGuideId = ObjectId(filterBy.tourGuideId)
+    criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
   if (filterBy.tourId) {
     // console.log('filterBy.tourId', filterBy.tourId);
@@ -171,9 +217,9 @@ function _buildCriteria(filterBy) {
   }
   if (filterBy.tags) {
     //Gets an array of tags
-    criteria.tags = { $eq: filterBy.tags }
+    criteria.tags = { $eq: filterBy.tags };
   }
-  console.log('criteria is: ', criteria);
+  console.log("criteria is: ", criteria);
 
   return criteria;
 }

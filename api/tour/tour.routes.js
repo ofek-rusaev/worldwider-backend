@@ -12,7 +12,6 @@ const {
 } = require("./tour.controller");
 const router = express.Router();
 
-
 // middleware that is specific to this router
 // router.use(requireAuth)
 
