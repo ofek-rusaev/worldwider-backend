@@ -107,6 +107,9 @@ async function add(booking) {
 function _buildCriteria(filterBy) {
   var criteria = {};
 
+  if (filterBy.bookingId) {
+    criteria._Id = ObjectId(filterBy.bookingId);
+  }
   if (filterBy.tourGuideId) {
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
