@@ -11,7 +11,7 @@ module.exports = {
   add
 };
 
-async function query(filterBy = { tourGuideId: ObjectId("5e78bf9c574870fbd3cc07eb") }) {
+async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
   const collection = await dbService.getCollection("user");
   try {
@@ -70,12 +70,17 @@ async function remove(userId) {
   }
 }
 
+// Update one: 
+// db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}}) 
+
 async function update(user) {
   const collection = await dbService.getCollection("user");
   user._id = ObjectId(user._id);
-
+  query(user._id);
   try {
-    await collection.replaceOne({ _id: user._id }, { $set: user });
+    await collection.updateOne({ _id: user._id }, { $set: user });
+    console.log('UPDATING USER: ', user);
+
     return user;
   } catch (err) {
     console.log(`ERROR: cannot update user ${user._id}`);

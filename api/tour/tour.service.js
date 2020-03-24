@@ -12,6 +12,7 @@ module.exports = {
   add
 };
 
+<<<<<<< HEAD
 const COLLECTION_NAME = "tour";
 
 async function query(
@@ -19,6 +20,13 @@ async function query(
 ) {
   const criteria = _buildCriteria(filterBy);
   console.log("criteria: ", criteria);
+=======
+async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 }) {
+  console.log('QUERY _ filterBy: ', filterBy);
+
+  const criteria = _buildCriteria(filterBy);
+  console.log('QUERY _  criteria: ', criteria);
+>>>>>>> 416d388064e030bc81f71c95e433dd5a43a3c798
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
@@ -46,9 +54,14 @@ async function query(
             "tourGuide.tourId": false
           }
         }
+<<<<<<< HEAD
       ])
       .toArray();
 
+=======
+      }
+    ]).toArray()
+>>>>>>> 416d388064e030bc81f71c95e433dd5a43a3c798
     return tours;
   } catch (error) {
     console.log("ERROR: cannot find tours");
@@ -61,7 +74,6 @@ async function getById(tourId) {
   try {
     const tour = await collection.findOne({ _id: ObjectId(tourId) });
     delete tour.password;
-    // console.log('backendddddd', tour)
     tour.givenReviews = await reviewService.query({
       byTourId: ObjectId(tour._id)
     });
@@ -110,9 +122,14 @@ async function update(tour) {
 }
 
 async function add(tour) {
+<<<<<<< HEAD
   const collection = await dbService.getCollection(COLLECTION_NAME);
+=======
+  const collection = await dbService.getCollection("tour");
+>>>>>>> 416d388064e030bc81f71c95e433dd5a43a3c798
   try {
     await collection.insertOne(tour);
+    userService.update(tour);
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -152,24 +169,28 @@ function getEmpty() {
 }
 
 function _buildCriteria(filterBy) {
+  console.log('_buildCriteria FILTER BY : ', filterBy);
+
   var criteria = {};
-  console.log(filterBy);
+  console.log('_buildCriteria - filterBy: ', filterBy)
   if (filterBy.city) {
-    criteria.city = filterBy.city;
+    var regex = new RegExp(filterBy.city, 'i');
+    criteria.city = { $regex: regex };
   }
   if (filterBy.price) {
     criteria.price = {
-      $gte: filterBy.minPrice,
-      $lte: filterBy.maxPrice
-    };
+      $gte: +filterBy.minPrice,
+      $lte: +filterBy.maxPrice
+    }
+    console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
   }
   if (filterBy.rating) {
     criteria.rating = {
-      $lte: filterBy.maxRating,
-      $gte: filterBy.minRating
-    };
+      $lte: +filterBy.maxRating,
+      $gte: +filterBy.minRating
+    }
+    console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   }
-
   if (filterBy.tourGuideId) {
     console.log("filterBy.tourGuideId", filterBy.tourGuideId);
 

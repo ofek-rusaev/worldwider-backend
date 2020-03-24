@@ -12,7 +12,6 @@ async function addBooking(req, res) {
 }
 
 async function getBookings(req, res) {
-  console.log("getting bookings");
   const bookings = await bookingService.query(req.query);
   res.send(bookings);
 }

@@ -8,6 +8,8 @@ async function getTour(req, res) {
     console.log("in get tour: ", tour);
     res.send(tour);
   }
+  const tour = await tourService.query({ tourId: req.params.id });
+  res.send(tour);
 }
 
 async function addTour(req, res) {
@@ -18,6 +20,7 @@ async function addTour(req, res) {
 }
 
 async function getTours(req, res) {
+  console.log("getting tours - WITH: req.query:::: ", req.query);
   const tours = await tourService.query(req.query);
   res.send(tours);
 }
