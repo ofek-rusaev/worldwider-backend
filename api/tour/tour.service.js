@@ -13,6 +13,8 @@ module.exports = {
 
 async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0, maxRating: 5 }) {
   const criteria = _buildCriteria(filterBy);
+  console.log('criteria: ', criteria);
+
   const tourCollection = await dbService.getCollection("tour");
   try {
     let tours = await tourCollection.aggregate([
@@ -41,6 +43,8 @@ async function query(filterBy = { minPrice: 0, maxPrice: Infinity, minRating: 0,
         }
       }
     ]).toArray()
+    console.log('tours in try: ', tours)
+
     return tours;
   }
   catch (error) {
@@ -135,15 +139,19 @@ function _buildCriteria(filterBy) {
 
 
   if (filterBy.tourGuideId) {
+    console.log('filterBy.tourGuideId', filterBy.tourGuideId);
+
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId)
   }
   if (filterBy.tourId) {
-    criteria.tourId = ObjectId(filterBy.tourId)
+    console.log('filterBy.tourId', filterBy.tourId);
+    criteria._id = ObjectId(filterBy.tourId)
   }
   if (filterBy.tags) {
     //Gets an array of tags
     criteria.tags = { $eq: filterBy.tags }
   }
+  console.log('criteria is: ', criteria);
 
   return criteria;
 }
