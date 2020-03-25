@@ -29,7 +29,6 @@ async function query(filterBy) {
     filterBy.maxRating = "5";
   }
   const criteria = _buildCriteria(filterBy);
-  // console.log('QUERY criteria: ', criteria);
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
@@ -59,7 +58,6 @@ async function query(filterBy) {
         }
       ])
       .toArray();
-    // console.log('IN QUERY TRY: TOURS: ', tours);
 
     return tours;
   } catch (error) {
@@ -122,7 +120,7 @@ async function remove(tourId) {
 async function update(tour) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
-  console.log("in tour service -tour shoult ID NOW: ", tour);
+  console.log("in tour service -tour should have ID NOW: ", tour);
 
   try {
     await collection.replaceOne({ _id: tour._id }, { $set: tour });
@@ -134,12 +132,16 @@ async function update(tour) {
 }
 
 async function add(tour) {
-  console.log(" IN SERVICE _ ADD TOUR: ", tour);
+  // tour._id = ObjectId(tour._id);
+  tour.tourGuideId = ObjectId(tour.tourGuideId);
+  // userService.updateTour()
 
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
-    userService.update(tour);
+    const tourId = tour._id;
+    const userId = tour.tourGuideId;
+    userService.updateTour(userId, tourId);
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -174,13 +176,12 @@ function getEmpty() {
     tourImgUrls: [
       "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
     ],
-    maxAttendees: 3
+    maxAttendees: 3,
+    availability: {}
   };
 }
 
 function _buildCriteria(filterBy) {
-  // console.log('_buildCriteria FILTER BY : ', filterBy);
-
   var criteria = {};
   if (filterBy.city) {
     var regex = new RegExp(filterBy.city, "i");
@@ -191,14 +192,12 @@ function _buildCriteria(filterBy) {
     $gte: +filterBy.minPrice,
     $lte: +filterBy.maxPrice
   };
-  // console.log('AFTER filterBy.price - criteria ::::: ', criteria);
   // }
   if (filterBy.rating) {
     criteria.rating = {
       $gte: +filterBy.minRating,
       $lte: +filterBy.maxRating
     };
-    // console.log('AFTER filterBy.rating - criteria.rating ::::: ', criteria);
   }
   // }
   // if (filterBy.rating) {
@@ -208,22 +207,17 @@ function _buildCriteria(filterBy) {
   //   $gt: +filterBy.minRating
 
   // }
-  // console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   // }
   if (filterBy.tourGuideId) {
-    // console.log('filterBy.tourGuideId', filterBy.tourGuideId);
-
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
   if (filterBy.tourId) {
-    // console.log('filterBy.tourId', filterBy.tourId);
     criteria._id = ObjectId(filterBy.tourId);
   }
   if (filterBy.tags) {
     //Gets an array of tags
     criteria.tags = { $eq: filterBy.tags };
   }
-  // console.log("criteria is: ", criteria);
 
   return criteria;
 }
