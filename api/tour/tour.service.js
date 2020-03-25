@@ -111,7 +111,7 @@ async function remove(tourId) {
 async function update(tour) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
-  console.log('in tour service -tour shoult ID NOW: ', tour)
+  console.log('in tour service -tour should have ID NOW: ', tour)
 
   try {
     await collection.replaceOne({ _id: tour._id }, { $set: tour });
@@ -123,6 +123,8 @@ async function update(tour) {
 }
 
 async function add(tour) {
+  // tour._id = ObjectId(tour._id);
+  tour.tourGuideId = ObjectId(tour.tourGuideId);
   console.log(' IN SERVICE _ ADD TOUR: ', tour);
 
   const collection = await dbService.getCollection(COLLECTION_NAME);
@@ -163,7 +165,9 @@ function getEmpty() {
     tourImgUrls: [
       "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
     ],
-    maxAttendees: 3
+    maxAttendees: 3,
+    availability: {},
+
   };
 }
 

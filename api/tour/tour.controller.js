@@ -7,16 +7,16 @@ async function getTour(req, res) {
     const tour = await tourService.query({ tourId: req.params.id });
     res.send(tour);
   }
-  const tour = await tourService.query({ tourId: req.params.id });
-  res.send(tour);
+  // const tour = await tourService.query({ tourId: req.params.id });
+  // res.send(tour);
 }
 
 async function addTour(req, res) {
   var tour = req.body;
-  console.log('BEFORE in controller - add tour: ', tour);
+  // console.log('BEFORE in controller - add tour: ', tour);
 
   tour = await tourService.add(tour);
-  console.log(' AFTER in controller - add tour: ', tour);
+  // console.log(' AFTER in controller - add tour: ', tour);
   // TODO - need to find aboutUser
   res.send(tour);
 }

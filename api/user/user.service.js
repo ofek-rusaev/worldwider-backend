@@ -18,7 +18,7 @@ async function query(filterBy = {}) {
     // const users = await collection.find({}).toArray();
     const users = await collection.find(criteria).toArray();
     users.forEach(user => delete user.password);
-    console.log('in query BE: ', users);
+    // console.log('in query BE: ', users);
 
     return users;
   } catch (err) {
@@ -59,7 +59,7 @@ async function getByEmail(email) {
 }
 
 async function remove(userId) {
-  console.log('user service DELETE: ', userId);
+  // console.log('user service DELETE: ', userId);
 
   const collection = await dbService.getCollection("user");
   try {
