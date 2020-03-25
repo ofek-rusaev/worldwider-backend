@@ -6,6 +6,7 @@ const reviewService = require("./review.service");
 async function getReviews(req, res) {
   try {
     const reviews = await reviewService.query(req.query);
+
     res.json(reviews);
   } catch (err) {
     logger.error("Cannot get reviews", err);
@@ -20,8 +21,8 @@ async function deleteReview(req, res) {
 
 async function addReview(req, res) {
   var review = req.body;
-  console.log('inside backend', review)
   review = await reviewService.add(review);
+
   review.byUser = req.session.user;
   // TODO - need to find aboutUser
   res.send(review);
