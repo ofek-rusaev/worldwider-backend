@@ -20,7 +20,7 @@ async function addTour(req, res) {
 }
 
 async function getTours(req, res) {
-  console.log('request!', req.query)
+  // console.log('request!', req.query)
   // console.log('getting tours - WITH: req.query:::: ', req.query)
   const tours = await tourService.query(req.query);
   res.send(tours);
