@@ -74,12 +74,14 @@ async function remove(userId) {
 // db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}}) 
 
 async function update(user) {
+  console.log(' IN USER SERVICE _ UPDATE AFTER ADDING NEW TOUR: arg user : ', user);
+
   const collection = await dbService.getCollection("user");
   user._id = ObjectId(user._id);
   query(user._id);
   try {
     await collection.updateOne({ _id: user._id }, { $set: user });
-    console.log('UPDATING USER: ', user);
+    console.log(' IN USER SERVICE _TRY  UPDATING USER: ', user);
 
     return user;
   } catch (err) {
