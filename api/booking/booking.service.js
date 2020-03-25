@@ -1,5 +1,7 @@
 const dbService = require("../../services/db.service");
 const reviewService = require("../review/review.service");
+const tourService = require("../tour/tour.service");
+const userService = require("../user/user.service");
 const ObjectId = require("mongodb").ObjectId;
 
 module.exports = {
@@ -7,7 +9,8 @@ module.exports = {
   getById,
   remove,
   update,
-  add
+  add,
+  getByTourGuideId
 };
 COLLECTION_NAME = "booking";
 async function query(filterBy = {}) {
@@ -40,11 +43,14 @@ async function query(filterBy = {}) {
         },
         {
           $project: {
+            "tour.price": false,
             "tourGuide._id": false,
             "tourGuide.password": false,
             "tourGuide.isAdmin": false,
             "tourGuide.tourId": false,
             "attendees.password": false,
+            "attendees.languages": false,
+            "attendees.email": false,
             "attendees.isAdmin": false,
             "attendees.tourId": false,
             "attendees._id": false
@@ -59,8 +65,65 @@ async function query(filterBy = {}) {
   }
 }
 
+async function getByTourGuideId(tourGuideId) {
+  const bookingCollection = await dbService.getCollection(COLLECTION_NAME);
+
+  try {
+    const tour = await tourService.getByTourGuideId(tourGuideId);
+    const guideBookings = await bookingCollection
+      .find({
+        tourId: ObjectId(tour._id)
+      })
+      .toArray();
+
+    const bookings = await Promise.all(
+      guideBookings.map(async booking => {
+        return {
+          _id: booking._id,
+          date: booking.date,
+          tour: {
+            _id: tour._id,
+            name: tour.name
+          },
+          reservations: await getBookingReservations(booking.reservations)
+        };
+      })
+    );
+    return bookings;
+  } catch (error) {
+    console.log("ERROR: cannot find bookings");
+    throw error;
+  }
+}
+
+//gets an array of reservations (userId, totalCost, attendeesAmount)
+//and returns the same array with all the user details
+async function getBookingReservations(reservations) {
+  return await Promise.all(
+    reservations.map(async reservation => {
+      const user = await userService.getById(reservation.userId);
+      return {
+        user: {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          _id: user._id,
+          email: user.email,
+          imgUrl: user.imgUrl
+        },
+        attendees: reservation.attendees,
+        totalCost: reservation.totalCost
+      };
+    })
+  );
+}
+
+// function getReservationAttendee(reservation){
+//   return userService.getById(reservation.userId)
+// }
+
 async function getById(bookingId) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
+
   try {
     const booking = await collection.findOne({ _id: ObjectId(bookingId) });
     return booking;
@@ -107,6 +170,8 @@ async function add(booking) {
         }
       ])
       .toArray();
+    // const userId = ObjectId(booking.userId);
+    // const tourId = ObjectId(booking.tourId);
     const tour = await tourCollection.findOne({
       _id: ObjectId(booking.tourId)
     });
@@ -117,43 +182,44 @@ async function add(booking) {
       //overbooking
       throw "overbooking";
     }
-    console.log("length,", bookingInstance.length);
-    console.log("bookingInstance", bookingInstance);
+
+    const reservation = {
+      userId: ObjectId(booking.userId),
+      attendees: +booking.attendeesAmount,
+      totalCost: booking.totalCost
+    };
+
     if (bookingInstance.length === 0) {
       //no instance for this tour on this day
 
       const bookingToInsert = {
         tourId: ObjectId(booking.tourId),
-        date: booking.date
+        date: booking.date,
+        reservations: [reservation]
       };
-
-      bookingToInsert.attendees = new Array(+booking.attendeesAmount).fill(
-        ObjectId(booking.userId)
-      );
-
-      const bookingFromDB = await bookingCollection.insertOne(bookingToInsert);
+      return await bookingCollection.insertOne(bookingToInsert);
     } else {
+      //Instance is already exist
       const bookingToInsert = JSON.parse(JSON.stringify(bookingInstance[0]));
       existingBookingInstanceId = ObjectId(bookingToInsert._id);
+      bookingToInsert.tourId = ObjectId(bookingToInsert.tourId);
       delete bookingToInsert._id;
-      if (
-        tour.maxAttendees - bookingToInsert.attendees.length <
-        +booking.attendeesAmount
-      ) {
+
+      currentAttendeesNum = 0;
+      bookingToInsert.reservations.map(reservation => {
+        currentAttendeesNum += reservation.attendees;
+      });
+      if (+booking.attendeesAmount > tour.maxAttendees - currentAttendeesNum) {
         //overbooking
         throw "overbooking";
       } else {
-        for (let i = 0; i < +booking.attendeesAmount; i++) {
-          bookingToInsert.attendees.unshift(booking.userId);
-        }
-        console.log(bookingToInsert._id);
-        const bookingFromDB = await bookingCollection.replaceOne(
+        bookingToInsert.reservations.unshift(reservation);
+        return await bookingCollection.replaceOne(
           { _id: existingBookingInstanceId },
           { $set: bookingToInsert }
         );
       }
     }
-    return bookingFromDB;
   } catch (err) {
     console.log(`ERROR: cannot insert booking, Reason:`, err);
     throw err;

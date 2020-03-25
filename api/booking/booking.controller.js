@@ -7,7 +7,6 @@ async function getBooking(req, res) {
 
 async function addBooking(req, res) {
   var booking = req.body;
-  console.log(booking);
   try {
     booking = await bookingService.add(booking);
     res.send(booking);
@@ -18,6 +17,10 @@ async function addBooking(req, res) {
 
 async function getBookings(req, res) {
   const bookings = await bookingService.query(req.query);
+  res.send(bookings);
+}
+async function getBookingsByTourGuideId(req, res) {
+  const bookings = await bookingService.getByTourGuideId(req.params.id);
   res.send(bookings);
 }
 
@@ -37,5 +40,6 @@ module.exports = {
   getBookings,
   deleteBooking,
   updateBooking,
-  addBooking
+  addBooking,
+  getBookingsByTourGuideId
 };

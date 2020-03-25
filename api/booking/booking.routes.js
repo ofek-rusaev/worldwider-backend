@@ -8,7 +8,8 @@ const {
   addBooking,
   getBookings,
   deleteBooking,
-  updateBooking
+  updateBooking,
+  getBookingsByTourGuideId
 } = require("./booking.controller");
 const router = express.Router();
 
@@ -17,6 +18,7 @@ const router = express.Router();
 
 router.get("/", getBookings);
 router.post("/", addBooking);
+router.get("/tourGuide/:id", getBookingsByTourGuideId);
 router.get("/:id", getBooking);
 router.put("/:id", updateBooking);
 router.delete("/:id", deleteBooking);
