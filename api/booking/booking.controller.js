@@ -24,6 +24,11 @@ async function getBookingsByTourGuideId(req, res) {
   res.send(bookings);
 }
 
+async function getByUserId(req, res) {
+  const bookings = await bookingService.getByUserId(req.params.id);
+  res.send(bookings);
+}
+
 async function deleteBooking(req, res) {
   await bookingService.remove(req.params.id);
   res.end();
@@ -41,5 +46,6 @@ module.exports = {
   deleteBooking,
   updateBooking,
   addBooking,
-  getBookingsByTourGuideId
+  getBookingsByTourGuideId,
+  getByUserId
 };

@@ -10,7 +10,8 @@ module.exports = {
   remove,
   update,
   add,
-  getByTourGuideId
+  getByTourGuideId,
+  getByUserId
 };
 COLLECTION_NAME = "booking";
 async function query(filterBy = {}) {
@@ -117,9 +118,42 @@ async function getBookingReservations(reservations) {
   );
 }
 
-// function getReservationAttendee(reservation){
-//   return userService.getById(reservation.userId)
-// }
+async function getByUserId(userId) {
+  console.log("fetching by user...");
+  const bookingCollection = await dbService.getCollection(COLLECTION_NAME);
+  try {
+    let bookings = await bookingCollection
+      .aggregate([
+        {
+          $match: {
+            "reservations.userId": ObjectId(userId)
+          }
+        }
+      ])
+      .toArray();
+    return await Promise.all(
+      bookings.map(async booking => {
+        const tour = await tourService.getById(booking.tourId);
+        const idx = booking.reservations.findIndex(
+          reservation => reservation.userId.toString() === userId
+        );
+        return {
+          _id: booking._id,
+          date: booking.date,
+          totalCost: booking.reservations[idx].totalCost,
+          tour: {
+            tourId: tour._id,
+            name: tour.name,
+            city: tour.city,
+            tourImgUrls: tour.tourImgUrls
+          }
+        };
+      })
+    );
+  } catch (error) {
+    throw error;
+  }
+}
 
 async function getById(bookingId) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
@@ -170,8 +204,6 @@ async function add(booking) {
         }
       ])
       .toArray();
-    // const userId = ObjectId(booking.userId);
-    // const tourId = ObjectId(booking.tourId);
     const tour = await tourCollection.findOne({
       _id: ObjectId(booking.tourId)
     });
