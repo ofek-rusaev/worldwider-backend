@@ -125,12 +125,14 @@ async function update(tour) {
 async function add(tour) {
   // tour._id = ObjectId(tour._id);
   tour.tourGuideId = ObjectId(tour.tourGuideId);
-  console.log(' IN SERVICE _ ADD TOUR: ', tour);
+  // userService.updateTour()
 
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
-    userService.update(tour);
+    const tourId = tour._id;
+    const userId = tour.tourGuideId;
+    userService.updateTour(userId, tourId)
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -166,8 +168,7 @@ function getEmpty() {
       "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
     ],
     maxAttendees: 3,
-    availability: {},
-
+    availability: {}
   };
 }
 
