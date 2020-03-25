@@ -2,6 +2,7 @@ const tourService = require("./tour.service");
 
 async function getTour(req, res) {
   if (req.params.id === "empty") {
+
     res.send(tourService.getEmpty());
   } else {
     const tour = await tourService.query({ tourId: req.params.id });
@@ -13,17 +14,13 @@ async function getTour(req, res) {
 
 async function addTour(req, res) {
   var tour = req.body;
-  console.log('BEFORE in controller - add tour: ', tour);
 
   tour = await tourService.add(tour);
-  console.log(' AFTER in controller - add tour: ', tour);
   // TODO - need to find aboutUser
   res.send(tour);
 }
 
 async function getTours(req, res) {
-  // console.log('request!', req.query)
-  // console.log('getting tours - WITH: req.query:::: ', req.query)
   const tours = await tourService.query(req.query);
   res.send(tours);
 }

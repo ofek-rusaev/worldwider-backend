@@ -8,17 +8,21 @@ module.exports = {
   getByEmail,
   remove,
   update,
-  add
+  add,
+  updateTour
 };
 
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
+  console.log('in query BE: criteria', criteria);
+  console.log('in query BE: filterBy', filterBy);
+
   const collection = await dbService.getCollection("user");
   try {
     // const users = await collection.find({}).toArray();
     const users = await collection.find(criteria).toArray();
     users.forEach(user => delete user.password);
-    console.log('in query BE: ', users);
+    // console.log('in query BE: ', users);
 
     return users;
   } catch (err) {
@@ -59,8 +63,6 @@ async function getByEmail(email) {
 }
 
 async function remove(userId) {
-  console.log('user service DELETE: ', userId);
-
   const collection = await dbService.getCollection("user");
   try {
     await collection.deleteOne({ _id: ObjectId(userId) });
@@ -74,15 +76,11 @@ async function remove(userId) {
 // db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}}) 
 
 async function update(user) {
-  console.log(' IN USER SERVICE _ UPDATE AFTER ADDING NEW TOUR: arg user : ', user);
-
   const collection = await dbService.getCollection("user");
   user._id = ObjectId(user._id);
-  query(user._id);
+  query(filter);
   try {
     await collection.updateOne({ _id: user._id }, { $set: user });
-    console.log(' IN USER SERVICE _TRY  UPDATING USER: ', user);
-
     return user;
   } catch (err) {
     console.log(`ERROR: cannot update user ${user._id}`);
@@ -99,6 +97,12 @@ async function add(user) {
     console.log(`ERROR: cannot insert user`);
     throw err;
   }
+}
+
+async function updateTour(userId, tourId) {
+  const collection = await dbService.getCollection('user');
+  // Update one: 
+  collection.updateOne({ "_id": ObjectId(userId) }, { $set: { tourId } })
 }
 
 function _buildCriteria(filterBy) {

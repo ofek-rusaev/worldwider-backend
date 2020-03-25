@@ -10,26 +10,25 @@ module.exports = {
   remove,
   update,
   getEmpty,
-  add
+  add,
+  getByTourGuideId
 };
 const COLLECTION_NAME = "tour";
 
 async function query(filterBy) {
   if (!filterBy.minPrice) {
-    filterBy.minPrice = '0'
+    filterBy.minPrice = "0";
   }
   if (!filterBy.maxPrice) {
-    filterBy.maxPrice = '10000000'
+    filterBy.maxPrice = "10000000";
   }
   if (!filterBy.minRating) {
-    filterBy.minRating = '0'
+    filterBy.minRating = "0";
   }
   if (!filterBy.maxRating) {
-    filterBy.maxRating = '5'
+    filterBy.maxRating = "5";
   }
   const criteria = _buildCriteria(filterBy);
-  // console.log('QUERY criteria: ', criteria);
-
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
@@ -57,10 +56,8 @@ async function query(filterBy) {
             "tourGuide.tourId": false
           }
         }
-
       ])
       .toArray();
-    // console.log('IN QUERY TRY: TOURS: ', tours);
 
     return tours;
   } catch (error) {
@@ -97,6 +94,18 @@ async function getByEmail(email) {
     throw err;
   }
 }
+async function getByTourGuideId(tourGuideId) {
+  console.log(tourGuideId);
+  const collection = await dbService.getCollection(COLLECTION_NAME);
+  try {
+    const tour = await collection.findOne({
+      tourGuideId: ObjectId(tourGuideId)
+    });
+    return tour;
+  } catch (err) {
+    console.log(`ERROR: cannot find tour ${tourId}`);
+  }
+}
 
 async function remove(tourId) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
@@ -111,7 +120,7 @@ async function remove(tourId) {
 async function update(tour) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
-  console.log('in tour service -tour shoult ID NOW: ', tour)
+  console.log("in tour service -tour should have ID NOW: ", tour);
 
   try {
     await collection.replaceOne({ _id: tour._id }, { $set: tour });
@@ -123,12 +132,16 @@ async function update(tour) {
 }
 
 async function add(tour) {
-  console.log(' IN SERVICE _ ADD TOUR: ', tour);
+  // tour._id = ObjectId(tour._id);
+  tour.tourGuideId = ObjectId(tour.tourGuideId);
+  // userService.updateTour()
 
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
-    userService.update(tour);
+    const tourId = tour._id;
+    const userId = tour.tourGuideId;
+    userService.updateTour(userId, tourId);
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -163,31 +176,28 @@ function getEmpty() {
     tourImgUrls: [
       "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
     ],
-    maxAttendees: 3
+    maxAttendees: 3,
+    availability: {}
   };
 }
 
 function _buildCriteria(filterBy) {
-  // console.log('_buildCriteria FILTER BY : ', filterBy);
-
   var criteria = {};
   if (filterBy.city) {
-    var regex = new RegExp(filterBy.city, 'i');
+    var regex = new RegExp(filterBy.city, "i");
     criteria.city = { $regex: regex };
   }
   // if (filterBy.price) {
   criteria.price = {
     $gte: +filterBy.minPrice,
     $lte: +filterBy.maxPrice
-  }
-  // console.log('AFTER filterBy.price - criteria ::::: ', criteria);
+  };
   // }
   if (filterBy.rating) {
     criteria.rating = {
       $gte: +filterBy.minRating,
       $lte: +filterBy.maxRating
-    }
-    // console.log('AFTER filterBy.rating - criteria.rating ::::: ', criteria);
+    };
   }
   // }
   // if (filterBy.rating) {
@@ -197,22 +207,17 @@ function _buildCriteria(filterBy) {
   //   $gt: +filterBy.minRating
 
   // }
-  // console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   // }
   if (filterBy.tourGuideId) {
-    // console.log('filterBy.tourGuideId', filterBy.tourGuideId);
-
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
   if (filterBy.tourId) {
-    // console.log('filterBy.tourId', filterBy.tourId);
-    criteria._id = ObjectId(filterBy.tourId)
+    criteria._id = ObjectId(filterBy.tourId);
   }
   if (filterBy.tags) {
     //Gets an array of tags
     criteria.tags = { $eq: filterBy.tags };
   }
-  // console.log("criteria is: ", criteria);
 
   return criteria;
 }
@@ -220,13 +225,13 @@ function _buildCriteria(filterBy) {
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function (a, b) {
+  return function(a, b) {
     if (property === "name")
       return a[property].toLowerCase() < b[property].toLowerCase()
         ? -1
         : a[property].toLowerCase() > b[property].toLowerCase()
-          ? 1
-          : 0;
+        ? 1
+        : 0;
     // else if (property === 'createdAt') return -1
     else return a[property] - b[property];
   };
