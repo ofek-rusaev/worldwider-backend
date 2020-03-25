@@ -82,9 +82,6 @@ function _buildCriteria(filterBy) {
     if (filterBy.tourGuideId) {
         criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
     }
-    if (filterBy.tourId) {
-        criteria.tourGuideId = ObjectId(filterBy.tourId);
-    }
     return criteria;
 }
 
