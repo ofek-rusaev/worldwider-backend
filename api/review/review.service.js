@@ -5,7 +5,6 @@ const COLLECTION_NAME = "review";
 
 async function query(filterBy = {}) {
     const criteria = _buildCriteria(filterBy);
-    console.log(criteria);
     const collection = await dbService.getCollection(COLLECTION_NAME);
     try {
         var reviews = await collection
@@ -50,6 +49,7 @@ async function query(filterBy = {}) {
 }
 
 async function remove(reviewId) {
+    console.log('keren', reviewId)
     const collection = await dbService.getCollection(COLLECTION_NAME);
     try {
         await collection.deleteOne({ _id: ObjectId(reviewId) });
@@ -60,11 +60,11 @@ async function remove(reviewId) {
 }
 
 async function add(review) {
-    console.log('new review', review)
     review.byUserId = ObjectId(review.byUserId);
     review.aboutUserId = ObjectId(review.aboutUserId);
     review.createdAt = Date.now();
     const collection = await dbService.getCollection(COLLECTION_NAME);
+    console.log('new review', review)
     try {
         await collection.insertOne(review);
         return review;
