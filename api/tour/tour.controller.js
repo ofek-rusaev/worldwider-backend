@@ -14,7 +14,10 @@ async function getTour(req, res) {
 
 async function addTour(req, res) {
   var tour = req.body;
+  console.log('BEFORE in controller - add tour: ', tour);
+
   tour = await tourService.add(tour);
+  console.log(' AFTER in controller - add tour: ', tour);
   // TODO - need to find aboutUser
   res.send(tour);
 }

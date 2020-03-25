@@ -1,5 +1,6 @@
 const dbService = require("../../services/db.service");
 const reviewService = require("../review/review.service");
+const userService = require("../user/user.service");
 const ObjectId = require("mongodb").ObjectId;
 
 module.exports = {
@@ -11,6 +12,7 @@ module.exports = {
   getEmpty,
   add
 };
+const COLLECTION_NAME = "tour";
 
 async function query(filterBy) {
   if (!filterBy.minPrice) {
@@ -28,7 +30,7 @@ async function query(filterBy) {
   const criteria = _buildCriteria(filterBy);
   console.log('QUERY criteria: ', criteria);
 
-  const COLLECTION_NAME = "tour";
+
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
     let tours = await tourCollection
@@ -109,6 +111,7 @@ async function remove(tourId) {
 async function update(tour) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
+  console.log('in tour service -tour shoult ID NOW: ', tour)
 
   try {
     await collection.replaceOne({ _id: tour._id }, { $set: tour });
@@ -120,6 +123,8 @@ async function update(tour) {
 }
 
 async function add(tour) {
+  console.log(' IN SERVICE _ ADD TOUR: ', tour);
+
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
