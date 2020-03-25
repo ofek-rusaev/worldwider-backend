@@ -7,8 +7,8 @@ async function getTour(req, res) {
     const tour = await tourService.query({ tourId: req.params.id });
     res.send(tour);
   }
-  const tour = await tourService.query({ tourId: req.params.id });
-  res.send(tour);
+  // const tour = await tourService.query({ tourId: req.params.id });
+  // res.send(tour);
 }
 
 async function addTour(req, res) {
