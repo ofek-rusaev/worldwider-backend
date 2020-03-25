@@ -60,10 +60,10 @@ async function remove(reviewId) {
 }
 
 async function add(review) {
-    console.log(review)
+    console.log('new review', review)
     review.byUserId = ObjectId(review.byUserId);
     review.aboutUserId = ObjectId(review.aboutUserId);
-
+    review.createdAt = Date.now();
     const collection = await dbService.getCollection(COLLECTION_NAME);
     try {
         await collection.insertOne(review);
