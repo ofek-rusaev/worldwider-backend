@@ -7,8 +7,13 @@ async function getBooking(req, res) {
 
 async function addBooking(req, res) {
   var booking = req.body;
-  booking = await bookingService.add(booking);
-  res.send(booking);
+  console.log(booking);
+  try {
+    booking = await bookingService.add(booking);
+    res.send(booking);
+  } catch (err) {
+    res.status(406).send(err);
+  }
 }
 
 async function getBookings(req, res) {

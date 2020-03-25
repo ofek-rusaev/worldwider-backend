@@ -21,14 +21,14 @@ async function query(filterBy = {}) {
         },
         {
           $lookup: {
-            from: "user",
-            localField: "tourGuideId",
+            from: "tour",
+            localField: "tourId",
             foreignField: "_id", //belong to the "from" collection
-            as: "tourGuide"
+            as: "tour"
           }
         },
         {
-          $unwind: "$tourGuide"
+          $unwind: "$tour"
         },
         {
           $lookup: {
@@ -94,12 +94,68 @@ async function update(booking) {
 }
 
 async function add(booking) {
-  const collection = await dbService.getCollection(COLLECTION_NAME);
+  const bookingCollection = await dbService.getCollection(COLLECTION_NAME);
+  const tourCollection = await dbService.getCollection("tour");
   try {
-    await collection.insertOne(booking);
-    return booking;
+    let bookingInstance = await bookingCollection
+      .aggregate([
+        {
+          $match: {
+            date: { $eq: booking.date },
+            tourId: ObjectId(booking.tourId)
+          }
+        }
+      ])
+      .toArray();
+    const tour = await tourCollection.findOne({
+      _id: ObjectId(booking.tourId)
+    });
+    console.log(tour);
+    console.log(bookingInstance);
+
+    if (booking.attendeesAmount > tour.maxAttendees) {
+      //overbooking
+      throw "overbooking";
+    }
+    console.log("length,", bookingInstance.length);
+    console.log("bookingInstance", bookingInstance);
+    if (bookingInstance.length === 0) {
+      //no instance for this tour on this day
+
+      const bookingToInsert = {
+        tourId: ObjectId(booking.tourId),
+        date: booking.date
+      };
+
+      bookingToInsert.attendees = new Array(+booking.attendeesAmount).fill(
+        ObjectId(booking.userId)
+      );
+
+      const bookingFromDB = await bookingCollection.insertOne(bookingToInsert);
+    } else {
+      const bookingToInsert = JSON.parse(JSON.stringify(bookingInstance[0]));
+      existingBookingInstanceId = ObjectId(bookingToInsert._id);
+      delete bookingToInsert._id;
+      if (
+        tour.maxAttendees - bookingToInsert.attendees.length <
+        +booking.attendeesAmount
+      ) {
+        //overbooking
+        throw "overbooking";
+      } else {
+        for (let i = 0; i < +booking.attendeesAmount; i++) {
+          bookingToInsert.attendees.unshift(booking.userId);
+        }
+        console.log(bookingToInsert._id);
+        const bookingFromDB = await bookingCollection.replaceOne(
+          { _id: existingBookingInstanceId },
+          { $set: bookingToInsert }
+        );
+      }
+    }
+    return bookingFromDB;
   } catch (err) {
-    console.log(`ERROR: cannot insert booking`);
+    console.log(`ERROR: cannot insert booking, Reason:`, err);
     throw err;
   }
 }
@@ -109,9 +165,6 @@ function _buildCriteria(filterBy) {
 
   if (filterBy.bookingId) {
     criteria._Id = ObjectId(filterBy.bookingId);
-  }
-  if (filterBy.tourGuideId) {
-    criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
   if (filterBy.tourId) {
     criteria.tourId = ObjectId(filterBy.tourId);
