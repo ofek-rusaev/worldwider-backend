@@ -173,21 +173,21 @@ function _buildCriteria(filterBy) {
     var regex = new RegExp(filterBy.city, 'i');
     criteria.city = { $regex: regex };
   }
-  if (filterBy.price) {
-    criteria.price = {
-      $gte: +filterBy.minPrice,
-      $lte: +filterBy.maxPrice
-    }
-    console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
-  }
-  if (filterBy.rating) {
-    criteria.rating = {
-      $lte: +filterBy.maxRating,
-      $gte: +filterBy.minRating
-    }
-    console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
-  }
-  console.log('IN IF filterBy.price - criteria.price ::::: ', criteria);
+  // if (filterBy.price) {
+  //   criteria.price = {
+  //     $gte: +filterBy.minPrice,
+  //     $lte: +filterBy.maxPrice
+  //   }
+  //   console.log('IN IF filterBy.price - criteria.price ::::: ', criteria.price);
+  // }
+  // if (filterBy.rating) {
+  //   criteria.rating = {
+  //     $lte: +filterBy.maxRating,
+  //     $gte: +filterBy.minRating
+  //   }
+  //   console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
+  // }
+  // console.log('IN IF filterBy.price - criteria.price ::::: ', criteria);
   // }
   // if (filterBy.rating) {
   // criteria.rating = {
