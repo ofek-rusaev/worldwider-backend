@@ -63,8 +63,6 @@ async function getByEmail(email) {
 }
 
 async function remove(userId) {
-  // console.log('user service DELETE: ', userId);
-
   const collection = await dbService.getCollection("user");
   try {
     await collection.deleteOne({ _id: ObjectId(userId) });
@@ -78,17 +76,11 @@ async function remove(userId) {
 // db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}}) 
 
 async function update(user) {
-
-  console.log(' IN USER SERVICE _ UPDATE AFTER ADDING NEW TOUR: arg user : ', user);
-
   const collection = await dbService.getCollection("user");
   user._id = ObjectId(user._id);
-  // var filter = { tourGuideId: user._id }
   query(filter);
   try {
     await collection.updateOne({ _id: user._id }, { $set: user });
-    console.log(' IN USER SERVICE _TRY  UPDATING USER: ', user);
-
     return user;
   } catch (err) {
     console.log(`ERROR: cannot update user ${user._id}`);

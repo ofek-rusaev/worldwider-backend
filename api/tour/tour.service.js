@@ -28,8 +28,6 @@ async function query(filterBy) {
     filterBy.maxRating = '5'
   }
   const criteria = _buildCriteria(filterBy);
-  // console.log('QUERY criteria: ', criteria);
-
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
@@ -60,7 +58,6 @@ async function query(filterBy) {
 
       ])
       .toArray();
-    // console.log('IN QUERY TRY: TOURS: ', tours);
 
     return tours;
   } catch (error) {
@@ -173,8 +170,6 @@ function getEmpty() {
 }
 
 function _buildCriteria(filterBy) {
-  // console.log('_buildCriteria FILTER BY : ', filterBy);
-
   var criteria = {};
   if (filterBy.city) {
     var regex = new RegExp(filterBy.city, 'i');
@@ -185,14 +180,12 @@ function _buildCriteria(filterBy) {
     $gte: +filterBy.minPrice,
     $lte: +filterBy.maxPrice
   }
-  // console.log('AFTER filterBy.price - criteria ::::: ', criteria);
   // }
   if (filterBy.rating) {
     criteria.rating = {
       $gte: +filterBy.minRating,
       $lte: +filterBy.maxRating
     }
-    // console.log('AFTER filterBy.rating - criteria.rating ::::: ', criteria);
   }
   // }
   // if (filterBy.rating) {
@@ -202,22 +195,18 @@ function _buildCriteria(filterBy) {
   //   $gt: +filterBy.minRating
 
   // }
-  // console.log('IN IF filterBy.rating - criteria.rating ::::: ', criteria.rating);
   // }
   if (filterBy.tourGuideId) {
-    // console.log('filterBy.tourGuideId', filterBy.tourGuideId);
 
     criteria.tourGuideId = ObjectId(filterBy.tourGuideId);
   }
   if (filterBy.tourId) {
-    // console.log('filterBy.tourId', filterBy.tourId);
     criteria._id = ObjectId(filterBy.tourId)
   }
   if (filterBy.tags) {
     //Gets an array of tags
     criteria.tags = { $eq: filterBy.tags };
   }
-  // console.log("criteria is: ", criteria);
 
   return criteria;
 }
