@@ -28,7 +28,7 @@ async function query(filterBy) {
     filterBy.maxRating = '5'
   }
   const criteria = _buildCriteria(filterBy);
-  console.log('QUERY criteria: ', criteria);
+  // console.log('QUERY criteria: ', criteria);
 
 
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
@@ -168,7 +168,7 @@ function getEmpty() {
 }
 
 function _buildCriteria(filterBy) {
-  console.log('_buildCriteria FILTER BY : ', filterBy);
+  // console.log('_buildCriteria FILTER BY : ', filterBy);
 
   var criteria = {};
   if (filterBy.city) {
@@ -212,7 +212,7 @@ function _buildCriteria(filterBy) {
     //Gets an array of tags
     criteria.tags = { $eq: filterBy.tags };
   }
-  console.log("criteria is: ", criteria);
+  // console.log("criteria is: ", criteria);
 
   return criteria;
 }

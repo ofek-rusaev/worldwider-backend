@@ -5,7 +5,6 @@ async function getTour(req, res) {
     res.send(tourService.getEmpty());
   } else {
     const tour = await tourService.query({ tourId: req.params.id });
-    console.log("in get tour: ", tour);
     res.send(tour);
   }
   const tour = await tourService.query({ tourId: req.params.id });
