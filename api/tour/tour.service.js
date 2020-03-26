@@ -81,10 +81,10 @@ async function getById(tourId) {
     tour.givenReviews = await reviewService.query({
       byTourId: ObjectId(tour._id)
     });
-    tour.givenReviews = tour.givenReviews.map(review => {
-      delete review.byTour;
-      return review;
-    });
+    // tour.givenReviews = tour.givenReviews.map(review => {
+    //   delete review.byTour;
+    //   return review;
+    // });
     return tour;
   } catch (err) {
     console.log(`ERROR: while finding tour ${tourId}`);
@@ -231,13 +231,13 @@ function _buildCriteria(filterBy) {
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function(a, b) {
+  return function (a, b) {
     if (property === "name")
       return a[property].toLowerCase() < b[property].toLowerCase()
         ? -1
         : a[property].toLowerCase() > b[property].toLowerCase()
-        ? 1
-        : 0;
+          ? 1
+          : 0;
     // else if (property === 'createdAt') return -1
     else return a[property] - b[property];
   };
