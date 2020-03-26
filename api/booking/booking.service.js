@@ -217,8 +217,8 @@ async function add(booking) {
     const tour = await tourCollection.findOne({
       _id: ObjectId(booking.tourId)
     });
-    console.log(tour);
-    console.log(bookingInstance);
+    // console.log(tour);
+    // console.log('booking', bookingInstance);
 
     if (booking.attendeesAmount > tour.maxAttendees) {
       //overbooking
@@ -255,6 +255,8 @@ async function add(booking) {
         //overbooking
         throw "overbooking";
       } else {
+        console.log('final booking', bookingToInsert)
+
         bookingToInsert.reservations.unshift(reservation);
         return await bookingCollection.replaceOne(
           { _id: existingBookingInstanceId },
