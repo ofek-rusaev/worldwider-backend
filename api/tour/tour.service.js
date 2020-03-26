@@ -58,8 +58,15 @@ async function query(filterBy) {
         }
       ])
       .toArray();
-
-    return tours;
+    return await Promise.all(
+      tours.map(async tour => {
+        tour.tourGuide.rating = await reviewService.getTotalByGuideId(
+          tour.tourGuideId
+        );
+        return tour;
+      })
+    );
+    // return tours;
   } catch (error) {
     console.log("ERROR: cannot find tours");
     throw error;
