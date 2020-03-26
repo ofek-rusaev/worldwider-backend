@@ -5,44 +5,79 @@ const COLLECTION_NAME = "review";
 
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
-
+  console.log(filterBy);
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     var reviews = await collection
       .aggregate([
         {
           $match: criteria
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "userId",
-            foreignField: "_id",
-            as: "by"
-          }
-        },
-        {
-          $unwind: "$by"
-        },
-        {
-          $project: {
-            userId: false,
-            "by.password": false,
-            "by.isAdmin": false,
-            "by.tourId": false,
-            "by.email": false,
-            "by.languages": false,
-            "by.bio": false
-          }
         }
       ])
       .toArray();
-    // reviews = reviews.map(review => {
-    //     review.byUser = {_id: review.byUser._id, username: review.byUser.username}
-    //     review.aboutUser = {_id: review.aboutUser._id, username: review.aboutUser.username}
-    //     delete review.byUserId;
-    //     delete review.aboutUserId;
-    return reviews;
+    // var reviewsWithUsers = await collection
+    //   .aggregate([
+    //     {
+    //       $match: criteria
+    //     },
+    //     {
+    //       $lookup: {
+    //         from: "user",
+    //         localField: "userId",
+    //         foreignField: "_id",
+    //         as: "by"
+    //       }
+    //     },
+    //     {
+    //       $unwind: "$by"
+    //     },
+    //     {
+    //       $project: {
+    //         userId: false,
+    //         "by.password": false,
+    //         "by.isAdmin": false,
+    //         "by.tourId": false,
+    //         "by.email": false,
+    //         "by.languages": false,
+    //         "by.bio": false
+    //       }
+    //     }
+    //   ])
+    //   .toArray();
+    let sum = 0;
+    const reviewsToReturn = await Promise.all(
+      reviews.map(async review => {
+        sum += review.rating;
+        if (review.userId) {
+          const userCollection = await dbService.getCollection("user");
+          try {
+            const user = await userCollection.findOne({
+              _id: ObjectId(review.userId)
+            });
+            if (user != null) {
+              review.by = {
+                lastName: user.lastName,
+                firstName: user.firstName,
+                createdAt: user.createdAt,
+                userImgUrl: user.userImgUrl
+              };
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        } else {
+          review.by = {
+            firstName: review.name
+          };
+        }
+        return review;
+      })
+    );
+    return {
+      reviews: reviewsToReturn,
+      avg: (sum / reviews.length).toFixed(1),
+      total: reviews.length
+    };
   } catch (err) {
     console.log("ERROR: cannot find reviews");
     throw err;
@@ -60,7 +95,9 @@ async function remove(reviewId) {
 }
 
 async function add(review) {
-  review.userId = ObjectId(review.userId);
+  if (review.userId) {
+    review.userId = ObjectId(review.userId);
+  }
   review.tourGuideId = ObjectId(review.tourGuideId);
   review.createdAt = Date.now();
   const collection = await dbService.getCollection(COLLECTION_NAME);

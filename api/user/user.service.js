@@ -14,8 +14,8 @@ module.exports = {
 
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
-  console.log('in query BE: criteria', criteria);
-  console.log('in query BE: filterBy', filterBy);
+  console.log("in query BE: criteria", criteria);
+  console.log("in query BE: filterBy", filterBy);
 
   const collection = await dbService.getCollection("user");
   try {
@@ -30,21 +30,11 @@ async function query(filterBy = {}) {
     throw err;
   }
 }
-
 async function getById(userId) {
   const collection = await dbService.getCollection("user");
   try {
     const user = await collection.findOne({ _id: ObjectId(userId) });
     delete user.password;
-
-    user.givenReviews = await reviewService.query({
-      byUserId: ObjectId(user._id)
-    });
-    user.givenReviews = user.givenReviews.map(review => {
-      delete review.byUser;
-      return review;
-    });
-
     return user;
   } catch (err) {
     console.log(`ERROR: while finding user ${userId}`);
@@ -72,8 +62,8 @@ async function remove(userId) {
   }
 }
 
-// Update one: 
-// db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}}) 
+// Update one:
+// db.customer.updateOne({"_id":ObjectId("579c6ecab87b4b49be12664c")}, {$set:{balance: 20}})
 
 async function update(user) {
   const collection = await dbService.getCollection("user");
@@ -100,9 +90,9 @@ async function add(user) {
 }
 
 async function updateTour(userId, tourId) {
-  const collection = await dbService.getCollection('user');
-  // Update one: 
-  collection.updateOne({ "_id": ObjectId(userId) }, { $set: { tourId } })
+  const collection = await dbService.getCollection("user");
+  // Update one:
+  collection.updateOne({ _id: ObjectId(userId) }, { $set: { tourId } });
 }
 
 function _buildCriteria(filterBy) {
@@ -116,7 +106,6 @@ function _buildCriteria(filterBy) {
   // if (filterBy.price) {
   //   criteria.price = { $gt: filterBy.tourGuideId };
   // }
-
 
   return criteria;
 }
