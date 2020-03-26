@@ -5,7 +5,6 @@ async function login(req, res) {
   const { email, password } = req.body;
   try {
     const user = await authService.login(email, password);
-    console.log(user);
     req.session.user = user;
     res.json(user);
   } catch (err) {
@@ -16,7 +15,6 @@ async function login(req, res) {
 async function signup(req, res) {
   try {
     const userFromClient = req.body;
-    // console.log(userFromClient);
     logger.debug(userFromClient.email + ", " + userFromClient.password);
     const account = await authService.signup(userFromClient);
     console.log("account", account);
@@ -27,7 +25,6 @@ async function signup(req, res) {
       account.email,
       userFromClient.password
     );
-    console.log(user);
     req.session.user = user;
     res.json(user);
   } catch (err) {

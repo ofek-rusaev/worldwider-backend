@@ -76,6 +76,9 @@ async function getByTourGuideId(tourGuideId) {
         tourId: ObjectId(tour._id)
       })
       .toArray();
+    if (guideBookings.length === 0) {
+      return guideBookings;
+    }
 
     const bookings = await Promise.all(
       guideBookings.map(async booking => {
@@ -134,6 +137,7 @@ async function getByUserId(userId) {
     return await Promise.all(
       bookings.map(async booking => {
         const tour = await tourService.getById(booking.tourId);
+        const guide = await userService.getById(tour.tourGuideId);
         const idx = booking.reservations.findIndex(
           reservation => reservation.userId.toString() === userId
         );
@@ -146,6 +150,11 @@ async function getByUserId(userId) {
             name: tour.name,
             city: tour.city,
             tourImgUrls: tour.tourImgUrls
+          },
+          guide: {
+            _id: guide._id,
+            firstName: guide.firstName,
+            lastName: guide.lastName
           }
         };
       })

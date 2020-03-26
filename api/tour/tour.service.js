@@ -95,7 +95,6 @@ async function getByEmail(email) {
   }
 }
 async function getByTourGuideId(tourGuideId) {
-  console.log(tourGuideId);
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     const tour = await collection.findOne({
