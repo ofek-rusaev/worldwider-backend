@@ -56,16 +56,21 @@ async function query(filterBy = {}) {
             });
             if (user != null) {
               review.by = {
+                _id: user._id,
                 lastName: user.lastName,
                 firstName: user.firstName,
                 createdAt: user.createdAt,
                 userImgUrl: user.userImgUrl
               };
+            } else {
+              review.by = {
+                firstName: review.name
+              };
             }
           } catch (err) {
             console.log(err);
           }
-        } else {
+        } else if (review.userId === null) {
           review.by = {
             firstName: review.name
           };
