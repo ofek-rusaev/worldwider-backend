@@ -9,7 +9,7 @@ async function addBooking(req, res) {
   var booking = req.body;
   try {
     booking = await bookingService.add(booking);
-    console.log("booking- controller", booking);
+    // console.log("booking- controller", booking);
     res.send(booking);
   } catch (err) {
     res.status(406).send(err);

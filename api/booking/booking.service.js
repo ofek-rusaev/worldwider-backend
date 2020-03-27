@@ -179,9 +179,9 @@ async function getById(bookingId) {
 }
 
 async function remove(bookingId, userId) {
-  console.log("userId first line", userId);
+  // console.log("userId first line", userId);
   const booking = await getById(bookingId);
-  console.log("booking", booking);
+  // console.log("booking", booking);
   if (userId.userId) {
     const reservationIdx = booking.reservations.findIndex(
       reservation => reservation.userId.toString() === userId.userId
@@ -190,17 +190,17 @@ async function remove(bookingId, userId) {
       return;
     }
     booking.reservations.splice(reservationIdx, 1);
-    console.log("new booking", booking);
+    // console.log("new booking", booking);
     await update(booking);
   } else if (
     booking.reservations.length === 0 ||
     Object.keys(userId).length === 0
   ) {
-    console.log("objct keys", Object.keys(userId).length);
+    // console.log("objct keys", Object.keys(userId).length);
     const collection = await dbService.getCollection(COLLECTION_NAME);
     try {
       await collection.deleteOne({ _id: ObjectId(bookingId) });
-      console.log("I delted the whole booking");
+      // console.log("I delted the whole booking");
     } catch (err) {
       console.log(`ERROR: cannot remove booking ${bookingId}`);
       throw err;
@@ -282,7 +282,7 @@ async function add(booking) {
           { _id: existingBookingInstanceId },
           { $set: bookingToInsert }
         );
-        console.log("updated", bookingToInsert);
+        // console.log("updated", bookingToInsert);
         return bookingToInsert;
       }
     }

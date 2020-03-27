@@ -59,7 +59,7 @@ async function query(filterBy) {
       ])
       .toArray();
     if (filterBy.sort) {
-      console.log(filterBy.sort)
+      // console.log(filterBy.sort)
       tours.sort(_dynamicSort(filterBy.sort));
       return tours;
     } else {
@@ -134,7 +134,7 @@ async function remove(tourId) {
 async function update(tour) {
   const collection = await dbService.getCollection(COLLECTION_NAME);
   tour._id = ObjectId(tour._id);
-  console.log("in tour service -tour should have ID NOW: ", tour);
+  // console.log("in tour service -tour should have ID NOW: ", tour);
 
   try {
     await collection.replaceOne({ _id: tour._id }, { $set: tour });
