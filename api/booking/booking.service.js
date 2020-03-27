@@ -258,10 +258,11 @@ async function add(booking) {
         console.log('final booking', bookingToInsert)
 
         bookingToInsert.reservations.unshift(reservation);
-        return await bookingCollection.replaceOne(
+        await bookingCollection.updateOne(
           { _id: existingBookingInstanceId },
           { $set: bookingToInsert }
         );
+        return bookingToInsert;
       }
     }
   } catch (err) {
