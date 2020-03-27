@@ -177,10 +177,22 @@ async function getById(bookingId) {
   }
 }
 
-async function remove(bookingId) {
+async function remove(bookingId, userId) {
+  const booking = await getById(bookingId);
+  console.log("booking", booking);
+  const reservationIdx = booking.reservations.findIndex(reservation => {
+    console.log("reservation.userId");
+    console.log(reservation.userId);
+    console.log(typeof reservation.userId);
+    console.log("userId.userId");
+    console.log(userId.userId);
+    console.log(typeof userId.userId);
+    return reservation.userId === ObjectId(userId.userId);
+  });
+  console.log("reservation", reservationIdx);
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
-    await collection.deleteOne({ _id: ObjectId(bookingId) });
+    // await collection.deleteOne({ _id: ObjectId(bookingId) });
   } catch (err) {
     console.log(`ERROR: cannot remove booking ${bookingId}`);
     throw err;

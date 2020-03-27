@@ -31,7 +31,9 @@ async function getByUserId(req, res) {
 }
 
 async function deleteBooking(req, res) {
-  await bookingService.remove(req.params.id);
+  const bookingId = req.params.id;
+  const userId = req.query;
+  await bookingService.remove(req.params.id, req.query);
   res.end();
 }
 
