@@ -9,6 +9,7 @@ async function addBooking(req, res) {
   var booking = req.body;
   try {
     booking = await bookingService.add(booking);
+    console.log("booking- controller", booking);
     res.send(booking);
   } catch (err) {
     res.status(406).send(err);
@@ -30,7 +31,9 @@ async function getByUserId(req, res) {
 }
 
 async function deleteBooking(req, res) {
-  await bookingService.remove(req.params.id);
+  const bookingId = req.params.id;
+  const userId = req.query;
+  await bookingService.remove(req.params.id, req.query);
   res.end();
 }
 

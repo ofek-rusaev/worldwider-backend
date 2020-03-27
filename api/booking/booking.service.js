@@ -122,7 +122,6 @@ async function getBookingReservations(reservations) {
 }
 
 async function getByUserId(userId) {
-  console.log("fetching by user...");
   const bookingCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
     let bookings = await bookingCollection
@@ -144,6 +143,7 @@ async function getByUserId(userId) {
         return {
           _id: booking._id,
           date: booking.date,
+          attendees: booking.reservations[idx].attendees,
           totalCost: booking.reservations[idx].totalCost,
           tour: {
             tourId: tour._id,
@@ -177,13 +177,33 @@ async function getById(bookingId) {
   }
 }
 
-async function remove(bookingId) {
-  const collection = await dbService.getCollection(COLLECTION_NAME);
-  try {
-    await collection.deleteOne({ _id: ObjectId(bookingId) });
-  } catch (err) {
-    console.log(`ERROR: cannot remove booking ${bookingId}`);
-    throw err;
+async function remove(bookingId, userId) {
+  console.log("userId first line", userId);
+  const booking = await getById(bookingId);
+  console.log("booking", booking);
+  if (userId.userId) {
+    const reservationIdx = booking.reservations.findIndex(
+      reservation => reservation.userId.toString() === userId.userId
+    );
+    if (reservationIdx === -1) {
+      return;
+    }
+    booking.reservations.splice(reservationIdx, 1);
+    console.log("new booking", booking);
+    await update(booking);
+  } else if (
+    booking.reservations.length === 0 ||
+    Object.keys(userId).length === 0
+  ) {
+    console.log("objct keys", Object.keys(userId).length);
+    const collection = await dbService.getCollection(COLLECTION_NAME);
+    try {
+      await collection.deleteOne({ _id: ObjectId(bookingId) });
+      console.log("I delted the whole booking");
+    } catch (err) {
+      console.log(`ERROR: cannot remove booking ${bookingId}`);
+      throw err;
+    }
   }
 }
 
@@ -239,7 +259,8 @@ async function add(booking) {
         date: booking.date,
         reservations: [reservation]
       };
-      return await bookingCollection.insertOne(bookingToInsert);
+      await bookingCollection.insertOne(bookingToInsert);
+      return bookingToInsert;
     } else {
       //Instance is already exist
       const bookingToInsert = JSON.parse(JSON.stringify(bookingInstance[0]));
@@ -255,13 +276,12 @@ async function add(booking) {
         //overbooking
         throw "overbooking";
       } else {
-        console.log('final booking', bookingToInsert)
-
         bookingToInsert.reservations.unshift(reservation);
         await bookingCollection.updateOne(
           { _id: existingBookingInstanceId },
           { $set: bookingToInsert }
         );
+        console.log("updated", bookingToInsert);
         return bookingToInsert;
       }
     }
