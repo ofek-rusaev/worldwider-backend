@@ -178,24 +178,32 @@ async function getById(bookingId) {
 }
 
 async function remove(bookingId, userId) {
+  console.log("userId first line", userId);
   const booking = await getById(bookingId);
   console.log("booking", booking);
-  const reservationIdx = booking.reservations.findIndex(reservation => {
-    console.log("reservation.userId");
-    console.log(reservation.userId);
-    console.log(typeof reservation.userId);
-    console.log("userId.userId");
-    console.log(userId.userId);
-    console.log(typeof userId.userId);
-    return reservation.userId === ObjectId(userId.userId);
-  });
-  console.log("reservation", reservationIdx);
-  const collection = await dbService.getCollection(COLLECTION_NAME);
-  try {
-    // await collection.deleteOne({ _id: ObjectId(bookingId) });
-  } catch (err) {
-    console.log(`ERROR: cannot remove booking ${bookingId}`);
-    throw err;
+  if (userId.userId) {
+    const reservationIdx = booking.reservations.findIndex(
+      reservation => reservation.userId.toString() === userId.userId
+    );
+    if (reservationIdx === -1) {
+      return;
+    }
+    booking.reservations.splice(reservationIdx, 1);
+    console.log("new booking", booking);
+    await update(booking);
+  } else if (
+    booking.reservations.length === 0 ||
+    Object.keys(userId).length === 0
+  ) {
+    console.log("objct keys", Object.keys(userId).length);
+    const collection = await dbService.getCollection(COLLECTION_NAME);
+    try {
+      await collection.deleteOne({ _id: ObjectId(bookingId) });
+      console.log("I delted the whole booking");
+    } catch (err) {
+      console.log(`ERROR: cannot remove booking ${bookingId}`);
+      throw err;
+    }
   }
 }
 
