@@ -143,6 +143,7 @@ async function getByUserId(userId) {
         return {
           _id: booking._id,
           date: booking.date,
+          attendees: booking.reservations[idx].attendees,
           totalCost: booking.reservations[idx].totalCost,
           tour: {
             tourId: tour._id,
