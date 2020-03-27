@@ -5,7 +5,7 @@ const COLLECTION_NAME = "review";
 
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
-  console.log(filterBy);
+  // console.log(filterBy);
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     var reviews = await collection

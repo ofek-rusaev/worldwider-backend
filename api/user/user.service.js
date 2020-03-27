@@ -14,8 +14,8 @@ module.exports = {
 
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
-  console.log("in query BE: criteria", criteria);
-  console.log("in query BE: filterBy", filterBy);
+  // console.log("in query BE: criteria", criteria);
+  // console.log("in query BE: filterBy", filterBy);
 
   const collection = await dbService.getCollection("user");
   try {
