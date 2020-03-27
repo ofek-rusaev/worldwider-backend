@@ -58,14 +58,22 @@ async function query(filterBy) {
         }
       ])
       .toArray();
-    return await Promise.all(
-      tours.map(async tour => {
-        tour.tourGuide.rating = await reviewService.getTotalByGuideId(
-          tour.tourGuideId
-        );
-        return tour;
-      })
-    );
+    if (filterBy.sort) {
+      console.log(filterBy.sort)
+      tours.sort(_dynamicSort(filterBy.sort));
+      return tours;
+    } else {
+
+      return await Promise.all(
+        tours.map(async tour => {
+          tour.tourGuide.rating = await reviewService.getTotalByGuideId(
+            tour.tourGuideId
+          );
+          return tour;
+        })
+      );
+
+    }
     // return tours;
   } catch (error) {
     console.log("ERROR: cannot find tours");
@@ -232,13 +240,7 @@ function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
   return function (a, b) {
-    if (property === "name")
-      return a[property].toLowerCase() < b[property].toLowerCase()
-        ? -1
-        : a[property].toLowerCase() > b[property].toLowerCase()
-          ? 1
-          : 0;
-    // else if (property === 'createdAt') return -1
-    else return a[property] - b[property];
+    if (property === "rating")
+      return a[property] - b[property];
   };
 }

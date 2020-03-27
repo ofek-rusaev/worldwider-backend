@@ -18,6 +18,7 @@ async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
+
     let bookings = await tourCollection
       .aggregate([
         {
@@ -303,6 +304,8 @@ function _buildCriteria(filterBy) {
 
   return criteria;
 }
+
+
 
 function _dynamicSort(property) {
   property = property.toLowerCase();
