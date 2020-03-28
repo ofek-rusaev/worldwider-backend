@@ -18,7 +18,6 @@ async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
   const tourCollection = await dbService.getCollection(COLLECTION_NAME);
   try {
-
     let bookings = await tourCollection
       .aggregate([
         {
@@ -82,7 +81,7 @@ async function getByTourGuideId(tourGuideId) {
     }
 
     const bookings = await Promise.all(
-      guideBookings.map(async booking => {
+      guideBookings.reverse().map(async booking => {
         return {
           _id: booking._id,
           date: booking.date,
@@ -116,7 +115,8 @@ async function getBookingReservations(reservations) {
           imgUrl: user.imgUrl
         },
         attendees: reservation.attendees,
-        totalCost: reservation.totalCost
+        totalCost: reservation.totalCost,
+        bookingDate: reservation.bookingDate
       };
     })
   );
@@ -135,7 +135,7 @@ async function getByUserId(userId) {
       ])
       .toArray();
     return await Promise.all(
-      bookings.map(async booking => {
+      bookings.reverse().map(async booking => {
         const tour = await tourService.getById(booking.tourId);
         const guide = await userService.getById(tour.tourGuideId);
         const idx = booking.reservations.findIndex(
@@ -146,6 +146,7 @@ async function getByUserId(userId) {
           date: booking.date,
           attendees: booking.reservations[idx].attendees,
           totalCost: booking.reservations[idx].totalCost,
+          bookingDate: booking.reservations[idx].bookingDate,
           tour: {
             tourId: tour._id,
             name: tour.name,
@@ -249,7 +250,8 @@ async function add(booking) {
     const reservation = {
       userId: ObjectId(booking.userId),
       attendees: +booking.attendeesAmount,
-      totalCost: booking.totalCost
+      totalCost: booking.totalCost,
+      bookingDate: Date.now()
     };
 
     if (bookingInstance.length === 0) {
@@ -305,18 +307,16 @@ function _buildCriteria(filterBy) {
   return criteria;
 }
 
-
-
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function (a, b) {
+  return function(a, b) {
     if (property === "name")
       return a[property].toLowerCase() < b[property].toLowerCase()
         ? -1
         : a[property].toLowerCase() > b[property].toLowerCase()
-          ? 1
-          : 0;
+        ? 1
+        : 0;
     // else if (property === 'createdAt') return -1
     else return a[property] - b[property];
   };
