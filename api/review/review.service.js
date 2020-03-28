@@ -6,6 +6,7 @@ const COLLECTION_NAME = "review";
 async function query(filterBy = {}) {
   const criteria = _buildCriteria(filterBy);
   // console.log(filterBy);
+  console.log(criteria);
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     var reviews = await collection
@@ -44,6 +45,7 @@ async function query(filterBy = {}) {
     //     }
     //   ])
     //   .toArray();
+    console.log(reviews);
     let sum = 0;
     const reviewsToReturn = await Promise.all(
       reviews.map(async review => {
@@ -67,6 +69,7 @@ async function query(filterBy = {}) {
                 firstName: review.name
               };
             }
+            console.log(user);
           } catch (err) {
             console.log(err);
           }
@@ -78,6 +81,7 @@ async function query(filterBy = {}) {
         return review;
       })
     );
+    console.log("reviewToReturn", reviewsToReturn);
     return {
       reviews: reviewsToReturn,
       avg: (sum / reviews.length).toFixed(1),
@@ -127,9 +131,10 @@ async function getTotalByGuideId(guideId) {
         }
       ])
       .toArray();
+
     let sum = 0;
     reviews.map(review => {
-      sum += review.rating;
+      if (typeof review.rating === "number") sum += review.rating;
     });
     let avg = sum / reviews.length;
     if (!avg) {
