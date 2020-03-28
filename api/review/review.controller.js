@@ -6,7 +6,15 @@ const reviewService = require("./review.service");
 async function getReviews(req, res) {
   try {
     const reviews = await reviewService.query(req.query);
-
+    res.json(reviews);
+  } catch (err) {
+    logger.error("Cannot get reviews", err);
+    res.status(500).send({ error: "cannot get reviews" });
+  }
+}
+async function getByUserId() {
+  try {
+    const reviews = await reviewService.getTotalByGuideId(req.params.id);
     res.json(reviews);
   } catch (err) {
     logger.error("Cannot get reviews", err);

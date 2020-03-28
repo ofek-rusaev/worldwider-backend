@@ -58,22 +58,23 @@ async function query(filterBy) {
         }
       ])
       .toArray();
-    if (filterBy.sort) {
-      // console.log(filterBy.sort)
-      tours.sort(_dynamicSort(filterBy.sort));
-      return tours;
-    } else {
+    console.log(filterBy);
 
-      return await Promise.all(
-        tours.map(async tour => {
-          tour.tourGuide.rating = await reviewService.getTotalByGuideId(
-            tour.tourGuideId
-          );
-          return tour;
-        })
-      );
-
+    const toursToReturn = await Promise.all(
+      tours.map(async tour => {
+        tour.tourGuide.rating = await reviewService.getTotalByGuideId(
+          tour.tourGuideId
+        );
+        return tour;
+      })
+    );
+    console.log(filterBy.sort);
+    if (filterBy.sort === "rating") {
+      console.log("enters");
+      console.log(Object.keys(filterBy.sort));
+      toursToReturn.sort(_dynamicSort(filterBy.sort));
     }
+    return toursToReturn;
     // return tours;
   } catch (error) {
     console.log("ERROR: cannot find tours");
@@ -239,8 +240,20 @@ function _buildCriteria(filterBy) {
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function (a, b) {
-    if (property === "rating")
-      return a[property] - b[property];
+  return function(a, b) {
+    // console.log(a, "b", b);
+    console.log(console.log(property));
+    console.log(a.tourGuide[property].avg);
+    console.log(Object.keys(a.tourGuide));
+    if (property === "rating") {
+      if (a.tourGuide[property].avg < b.tourGuide[property].avg) {
+        return 1;
+      }
+      if (a.tourGuide[property].avg > b.tourGuide[property].avg) {
+        return -1;
+      }
+      return 0;
+      // return a.tourGuide[property].avg - b.tourGuide[property].avg;
+    }
   };
 }

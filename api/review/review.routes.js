@@ -3,7 +3,12 @@ const {
   requireAuth,
   requireAdmin
 } = require("../../middlewares/requireAuth.middleware");
-const { addReview, getReviews, deleteReview } = require("./review.controller");
+const {
+  addReview,
+  getReviews,
+  deleteReview,
+  getByUserId
+} = require("./review.controller");
 const router = express.Router();
 
 // middleware that is specific to this router
