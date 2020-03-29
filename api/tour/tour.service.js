@@ -68,9 +68,8 @@ async function query(filterBy) {
         return tour;
       })
     );
-    console.log(filterBy.sort);
+    // console.log(filterBy.sort);
     if (filterBy.sort === "rating") {
-      console.log("enters");
       console.log(Object.keys(filterBy.sort));
       toursToReturn.sort(_dynamicSort(filterBy.sort));
     }
@@ -150,13 +149,13 @@ async function add(tour) {
   // tour._id = ObjectId(tour._id);
   tour.tourGuideId = ObjectId(tour.tourGuideId);
   // userService.updateTour()
-
   const collection = await dbService.getCollection(COLLECTION_NAME);
   try {
     await collection.insertOne(tour);
     const tourId = tour._id;
     const userId = tour.tourGuideId;
     userService.updateTour(userId, tourId);
+
     return tour;
   } catch (err) {
     console.log(`ERROR: cannot insert tour`);
@@ -240,11 +239,11 @@ function _buildCriteria(filterBy) {
 function _dynamicSort(property) {
   property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function(a, b) {
+  return function (a, b) {
     // console.log(a, "b", b);
-    console.log(console.log(property));
-    console.log(a.tourGuide[property].avg);
-    console.log(Object.keys(a.tourGuide));
+    // console.log(console.log(property));
+    // console.log(a.tourGuide[property].avg);
+    // console.log(Object.keys(a.tourGuide));
     if (property === "rating") {
       if (a.tourGuide[property].avg < b.tourGuide[property].avg) {
         return 1;
@@ -257,3 +256,5 @@ function _dynamicSort(property) {
     }
   };
 }
+
+//keren
