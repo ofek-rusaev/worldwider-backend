@@ -87,7 +87,8 @@ async function getByTourGuideId(tourGuideId) {
           date: booking.date,
           tour: {
             _id: tour._id,
-            name: tour.name
+            name: tour.name,
+            imgUrl: tour.tourImgUrls[0]
           },
           reservations: await getBookingReservations(booking.reservations)
         };
@@ -112,7 +113,7 @@ async function getBookingReservations(reservations) {
           lastName: user.lastName,
           _id: user._id,
           email: user.email,
-          imgUrl: user.imgUrl
+          imgUrl: user.userImgUrl
         },
         attendees: reservation.attendees,
         totalCost: reservation.totalCost,

@@ -16,6 +16,7 @@ module.exports = {
 const COLLECTION_NAME = "tour";
 
 async function query(filterBy) {
+  console.log(filterBy);
   if (!filterBy.minPrice) {
     filterBy.minPrice = "0";
   }
@@ -69,10 +70,7 @@ async function query(filterBy) {
       })
     );
     // console.log(filterBy.sort);
-    if (filterBy.sort === "rating") {
-      console.log(Object.keys(filterBy.sort));
-      toursToReturn.sort(_dynamicSort(filterBy.sort));
-    }
+    toursToReturn.sort(_dynamicSort(filterBy));
     return toursToReturn;
     // return tours;
   } catch (error) {
@@ -190,8 +188,7 @@ function getEmpty() {
     tourImgUrls: [
       "https://res.cloudinary.com/ddkf2aaiu/image/upload/v1584887490/london-shore-min_z5vxxw.png"
     ],
-    maxAttendees: 3,
-    availability: {}
+    maxAttendees: 3
   };
 }
 
@@ -207,12 +204,12 @@ function _buildCriteria(filterBy) {
     $lte: +filterBy.maxPrice
   };
   // }
-  if (filterBy.rating) {
-    criteria.rating = {
-      $gte: +filterBy.minRating,
-      $lte: +filterBy.maxRating
-    };
-  }
+  // if (filterBy.rating) {
+  //   criteria.rating = {
+  //     $gte: +filterBy.minRating,
+  //     $lte: +filterBy.maxRating
+  //   };
+  // }
   // }
   // if (filterBy.rating) {
   // criteria.rating = {
@@ -236,20 +233,29 @@ function _buildCriteria(filterBy) {
   return criteria;
 }
 
-function _dynamicSort(property) {
-  property = property.toLowerCase();
+function _dynamicSort(filterBy) {
+  // property = property.toLowerCase();
   // if (property === 'created') property = 'createdAt'
-  return function (a, b) {
+  return function(a, b) {
     // console.log(a, "b", b);
     // console.log(console.log(property));
     // console.log(a.tourGuide[property].avg);
     // console.log(Object.keys(a.tourGuide));
-    if (property === "rating") {
-      if (a.tourGuide[property].avg < b.tourGuide[property].avg) {
-        return 1;
-      }
-      if (a.tourGuide[property].avg > b.tourGuide[property].avg) {
+    console.log(filterBy.rating);
+    if (filterBy.rating !== null) {
+      if (a.tourGuide["rating"].avg < b.tourGuide["rating"].avg) {
+        if (filterBy.rating === true) {
+          return 1;
+        }
+      } else {
         return -1;
+      }
+      if (a.tourGuide["rating"].avg > b.tourGuide["rating"].avg) {
+        if (filterBy.rating === true) {
+          return -1;
+        }
+      } else {
+        return 1;
       }
       return 0;
       // return a.tourGuide[property].avg - b.tourGuide[property].avg;
