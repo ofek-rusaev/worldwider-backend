@@ -34,6 +34,8 @@ async function getById(userId) {
   const collection = await dbService.getCollection("user");
   try {
     const user = await collection.findOne({ _id: ObjectId(userId) });
+    const rating = await reviewService.getTotalByGuideId(userId);
+    user.rating = rating;
     delete user.password;
     return user;
   } catch (err) {

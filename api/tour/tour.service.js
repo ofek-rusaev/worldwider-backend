@@ -16,7 +16,6 @@ module.exports = {
 const COLLECTION_NAME = "tour";
 
 async function query(filterBy) {
-  console.log(filterBy);
   if (!filterBy.minPrice) {
     filterBy.minPrice = "0";
   }
@@ -59,7 +58,6 @@ async function query(filterBy) {
         }
       ])
       .toArray();
-    console.log(filterBy);
 
     const toursToReturn = await Promise.all(
       tours.map(async tour => {
@@ -241,7 +239,6 @@ function _dynamicSort(filterBy) {
     // console.log(console.log(property));
     // console.log(a.tourGuide[property].avg);
     // console.log(Object.keys(a.tourGuide));
-    console.log(filterBy.rating);
     if (filterBy.rating !== null) {
       if (a.tourGuide["rating"].avg < b.tourGuide["rating"].avg) {
         if (filterBy.rating === true) {
